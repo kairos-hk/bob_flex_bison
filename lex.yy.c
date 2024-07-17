@@ -439,13 +439,17 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "fb2-1.l"
-#line 3 "fb2-1.l"
+#line 1 "fb2-2.l"
+#line 4 "fb2-2.l"
 int chars = 0;
 int words = 0;
 int lines = 0;
-#line 447 "lex.yy.c"
-#line 448 "lex.yy.c"
+
+int totchars = 0;
+int totwords = 0;
+int totlines = 0;
+#line 451 "lex.yy.c"
+#line 452 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -662,10 +666,10 @@ YY_DECL
 		}
 
 	{
-#line 8 "fb2-1.l"
+#line 13 "fb2-2.l"
 
 
-#line 668 "lex.yy.c"
+#line 672 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -724,26 +728,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 10 "fb2-1.l"
+#line 15 "fb2-2.l"
 { words++; chars += strlen(yytext); }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 11 "fb2-1.l"
+#line 16 "fb2-2.l"
 { chars++; lines++; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 12 "fb2-1.l"
+#line 17 "fb2-2.l"
 { chars++; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 14 "fb2-1.l"
+#line 19 "fb2-2.l"
 ECHO;
 	YY_BREAK
-#line 746 "lex.yy.c"
+#line 750 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1748,20 +1752,35 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 14 "fb2-1.l"
+#line 19 "fb2-2.l"
 
 
-main(argc, argv)
-int argc;
-char **argv;
+main(int argc, char **argv)
 {
-  if(argc > 1) {
-    if(!(yyin = fopen(argv[1], "r"))) {
+  int i;
+
+  if(argc < 2) { /* just read stdin */
+    yylex();
+    printf("%8d%8d%8d\n", lines, words, chars);
+    return 0;
+  }
+
+  for(i = 1; i < argc; i++) {
+    FILE *f = fopen(argv[i], "r");
+  
+    if(!f) {
       perror(argv[1]);
       return (1);
     }
+    yyrestart(f);
+    yylex();
+    fclose(f);
+    printf("%8d%8d%8d %s\n", lines, words, chars, argv[i]);
+    totchars += chars; chars = 0;
+    totwords += words; words = 0;
+    totlines += lines; lines = 0;
   }
-
-  yylex();
-  printf("%8d%8d%8d\n", lines, words, chars);
+  if(argc > 1)
+    printf("%8d%8d%8d total\n", totlines, totwords, totchars);
+  return 0;
 }
